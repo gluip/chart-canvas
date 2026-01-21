@@ -31,7 +31,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {
             type: {
               type: "string",
-              enum: ["line", "bar", "scatter", "table"],
+              enum: ["line", "bar", "scatter", "table", "flowchart"],
               description: "Type of visualization to create",
             },
             series: {
@@ -80,6 +80,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               },
               required: ["headers", "rows"],
               description: "Table data (required for table type)",
+            },
+            mermaid: {
+              type: "string",
+              description: "Mermaid diagram syntax (required for flowchart type)",
             },
             title: {
               type: "string",
@@ -130,10 +134,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   switch (name) {
     case "addVisualization": {
-      const { type, series, table, title, description, xLabels } = args as {
-        type: "line" | "bar" | "scatter" | "table";
+      const { type, series, table, mermaid, title, description, xLabels } = args as {
+        type: "line" | "bar" | "scatter" | "table" | "flowchart";
         series?: { name: string; data: [number, number][] }[];
         table?: { headers: string[]; rows: (string | number)[][] };
+        mermaid?: string;
         title?: string;
         description?: string;
         xLabels?: string[];
@@ -143,6 +148,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         type,
         series,
         table,
+        mermaid,
         title,
         description,
         xLabels,

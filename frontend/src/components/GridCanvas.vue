@@ -20,10 +20,17 @@
         :i="item.i"
       >
         <ChartCard
-          v-if="getVisualization(item.i).type !== 'table'"
+          v-if="['line', 'bar', 'scatter'].includes(getVisualization(item.i).type)"
           :visualization="getVisualization(item.i)"
         />
-        <TableCard v-else :visualization="getVisualization(item.i)" />
+        <TableCard
+          v-else-if="getVisualization(item.i).type === 'table'"
+          :visualization="getVisualization(item.i)"
+        />
+        <FlowchartCard
+          v-else-if="getVisualization(item.i).type === 'flowchart'"
+          :visualization="getVisualization(item.i)"
+        />
       </grid-item>
     </grid-layout>
   </div>
@@ -34,6 +41,7 @@ import { ref, watch } from "vue";
 import { GridLayout, GridItem } from "grid-layout-plus";
 import ChartCard from "./ChartCard.vue";
 import TableCard from "./TableCard.vue";
+import FlowchartCard from "./FlowchartCard.vue";
 import type { VisualizationData } from "@/types/canvas";
 
 interface Props {

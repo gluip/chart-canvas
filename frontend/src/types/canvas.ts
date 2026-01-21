@@ -10,9 +10,10 @@ export interface TableData {
 
 export interface VisualizationData {
   id: string;
-  type: "line" | "bar" | "scatter" | "table";
+  type: "line" | "bar" | "scatter" | "table" | "flowchart";
   series?: SeriesData[];
   table?: TableData;
+  mermaid?: string;
   title?: string;
   description?: string;
   xLabels?: string[];

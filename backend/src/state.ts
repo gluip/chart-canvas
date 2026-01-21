@@ -13,14 +13,19 @@ class StateManager {
   addVisualization(
     viz: Omit<VisualizationData, "id" | "x" | "y" | "w" | "h">,
   ): VisualizationData {
+    // Flowcharts krijgen een grotere default grootte
+    const isFlowchart = viz.type === "flowchart";
+    const defaultWidth = isFlowchart ? 10 : 6;
+    const defaultHeight = isFlowchart ? 8 : 4;
+    
     const newViz: VisualizationData = {
       id: randomUUID(),
       ...viz,
       // Auto-position: calculate next available spot
       x: (this.state.visualizations.length % 2) * 6,
       y: Math.floor(this.state.visualizations.length / 2) * 4,
-      w: 6,
-      h: 4,
+      w: defaultWidth,
+      h: defaultHeight,
     };
 
     this.state.visualizations.push(newViz);
