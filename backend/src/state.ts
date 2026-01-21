@@ -17,7 +17,7 @@ class StateManager {
     const isFlowchart = viz.type === "flowchart";
     const defaultWidth = isFlowchart ? 10 : 6;
     const defaultHeight = isFlowchart ? 8 : 4;
-    
+
     const newViz: VisualizationData = {
       id: randomUUID(),
       ...viz,

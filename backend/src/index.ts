@@ -83,7 +83,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             mermaid: {
               type: "string",
-              description: "Mermaid diagram syntax (required for flowchart type)",
+              description:
+                "Mermaid diagram syntax (required for flowchart type)",
             },
             title: {
               type: "string",
@@ -134,15 +135,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   switch (name) {
     case "addVisualization": {
-      const { type, series, table, mermaid, title, description, xLabels } = args as {
-        type: "line" | "bar" | "scatter" | "table" | "flowchart";
-        series?: { name: string; data: [number, number][] }[];
-        table?: { headers: string[]; rows: (string | number)[][] };
-        mermaid?: string;
-        title?: string;
-        description?: string;
-        xLabels?: string[];
-      };
+      const { type, series, table, mermaid, title, description, xLabels } =
+        args as {
+          type: "line" | "bar" | "scatter" | "table" | "flowchart";
+          series?: { name: string; data: [number, number][] }[];
+          table?: { headers: string[]; rows: (string | number)[][] };
+          mermaid?: string;
+          title?: string;
+          description?: string;
+          xLabels?: string[];
+        };
 
       const viz = stateManager.addVisualization({
         type,

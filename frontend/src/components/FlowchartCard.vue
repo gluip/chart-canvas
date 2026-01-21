@@ -54,9 +54,12 @@ onMounted(() => {
   renderDiagram();
 });
 
-watch(() => props.visualization.mermaid, () => {
-  renderDiagram();
-});
+watch(
+  () => props.visualization.mermaid,
+  () => {
+    renderDiagram();
+  },
+);
 </script>
 
 <style scoped>
