@@ -34,15 +34,29 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               enum: ["line", "bar", "scatter"],
               description: "Type of chart to create",
             },
-            points: {
+            series: {
               type: "array",
               items: {
-                type: "array",
-                items: { type: "number" },
-                minItems: 2,
-                maxItems: 2,
+                type: "object",
+                properties: {
+                  name: {
+                    type: "string",
+                    description: "Name of the series (e.g., '2015', 'Product A')",
+                  },
+                  data: {
+                    type: "array",
+                    items: {
+                      type: "array",
+                      items: { type: "number" },
+                      minItems: 2,
+                      maxItems: 2,
+                    },
+                    description: "Array of [x, y] coordinate pairs for this series",
+                  },
+                },
+                required: ["name", "data"],
               },
-              description: "Array of [x, y] coordinate pairs",
+              description: "Array of data series to display",
             },
             title: {
               type: "string",
@@ -55,10 +69,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             xLabels: {
               type: "array",
               items: { type: "string" },
-              description: "Optional labels for the x-axis (e.g., dates). Should match the number of data points.",
+              description:
+                "Optional labels for the x-axis (e.g., dates). Should match the number of data points.",
             },
           },
-          required: ["type", "points"],
+          required: ["type", "series"],
         },
       },
       {
@@ -92,15 +107,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   switch (name) {
     case "addVisualization": {
-      const { type, points, title, description, xLabels } = args as {
+      const { type, series, title, description, xLabels } = args as {
         type: "line" | "bar" | "scatter";
-        points: [number, number][];
+        series: { name: string; data: [number, number][] }[];
         title?: string;
         description?: string;
         xLabels?: string[];
       };
 
-      const viz = stateManager.addVisualization({ type, points, title, description, xLabels });
+      const viz = stateManager.addVisualization({ type, series, title, description, xLabels });
 
       return {
         content: [

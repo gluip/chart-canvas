@@ -36,18 +36,29 @@ interface Props {
 const props = defineProps<Props>();
 
 const chartOption = computed(() => {
-  const xData = props.visualization.xLabels || props.visualization.points.map((p) => p[0]);
-  const yData = props.visualization.points.map((p) => p[1]);
+  // Use xLabels or generate from first series data
+  const xData = props.visualization.xLabels || props.visualization.series[0].data.map((p) => p[0]);
+
+  // Map series to ECharts format
+  const seriesData = props.visualization.series.map((s) => ({
+    name: s.name,
+    type: props.visualization.type === "scatter" ? "scatter" : props.visualization.type,
+    data: s.data.map((p) => p[1]),
+  }));
 
   const baseOption = {
     tooltip: {
       trigger: "axis",
     },
+    legend: {
+      data: props.visualization.series.map((s) => s.name),
+      top: 0,
+    },
     grid: {
       left: "10%",
       right: "5%",
       bottom: "15%",
-      top: "10%",
+      top: props.visualization.series.length > 1 ? "15%" : "10%",
     },
     xAxis: {
       type: "category",
@@ -56,12 +67,7 @@ const chartOption = computed(() => {
     yAxis: {
       type: "value",
     },
-    series: [
-      {
-        data: yData,
-        type: props.visualization.type === "scatter" ? "scatter" : props.visualization.type,
-      },
-    ],
+    series: seriesData,
   };
 
   return baseOption;

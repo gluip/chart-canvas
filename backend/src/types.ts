@@ -1,7 +1,12 @@
+export interface SeriesData {
+  name: string;
+  data: [number, number][];
+}
+
 export interface VisualizationData {
   id: string;
   type: "line" | "bar" | "scatter";
-  points: [number, number][];
+  series: SeriesData[];
   title?: string;
   description?: string;
   xLabels?: string[];
