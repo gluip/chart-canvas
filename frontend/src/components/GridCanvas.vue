@@ -26,30 +26,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { GridLayout, GridItem } from 'grid-layout-plus'
-import ChartCard from './ChartCard.vue'
-import type { VisualizationData } from '@/types/canvas'
+import { ref, computed } from "vue";
+import { GridLayout, GridItem } from "grid-layout-plus";
+import ChartCard from "./ChartCard.vue";
+import type { VisualizationData } from "@/types/canvas";
 
 interface Props {
-  visualizations: VisualizationData[]
+  visualizations: VisualizationData[];
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const layout = ref(
-  props.visualizations.map(v => ({
+  props.visualizations.map((v) => ({
     x: v.x,
     y: v.y,
     w: v.w,
     h: v.h,
-    i: v.id
-  }))
-)
+    i: v.id,
+  })),
+);
 
 const getVisualization = (id: string) => {
-  return props.visualizations.find(v => v.id === id)!
-}
+  return props.visualizations.find((v) => v.id === id)!;
+};
 </script>
 
 <style scoped>

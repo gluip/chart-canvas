@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import GridCanvas from './components/GridCanvas.vue'
-import { mockCanvasState } from './data/mockCanvas'
+import GridCanvas from "./components/GridCanvas.vue";
+import { mockCanvasState } from "./data/mockCanvas";
 </script>
 
 <template>

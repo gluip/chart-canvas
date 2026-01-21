@@ -10,53 +10,61 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { use } from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
-import { LineChart, BarChart, ScatterChart } from 'echarts/charts'
-import { GridComponent, TooltipComponent, TitleComponent } from 'echarts/components'
-import VChart from 'vue-echarts'
-import type { VisualizationData } from '@/types/canvas'
+import { computed } from "vue";
+import { use } from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import { LineChart, BarChart, ScatterChart } from "echarts/charts";
+import { GridComponent, TooltipComponent, TitleComponent } from "echarts/components";
+import VChart from "vue-echarts";
+import type { VisualizationData } from "@/types/canvas";
 
-use([CanvasRenderer, LineChart, BarChart, ScatterChart, GridComponent, TooltipComponent, TitleComponent])
+use([
+  CanvasRenderer,
+  LineChart,
+  BarChart,
+  ScatterChart,
+  GridComponent,
+  TooltipComponent,
+  TitleComponent,
+]);
 
 interface Props {
-  visualization: VisualizationData
+  visualization: VisualizationData;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const chartOption = computed(() => {
-  const xData = props.visualization.points.map(p => p[0])
-  const yData = props.visualization.points.map(p => p[1])
+  const xData = props.visualization.points.map((p) => p[0]);
+  const yData = props.visualization.points.map((p) => p[1]);
 
   const baseOption = {
     tooltip: {
-      trigger: 'axis'
+      trigger: "axis",
     },
     grid: {
-      left: '10%',
-      right: '5%',
-      bottom: '15%',
-      top: '10%'
+      left: "10%",
+      right: "5%",
+      bottom: "15%",
+      top: "10%",
     },
     xAxis: {
-      type: 'category',
-      data: xData
+      type: "category",
+      data: xData,
     },
     yAxis: {
-      type: 'value'
+      type: "value",
     },
     series: [
       {
         data: yData,
-        type: props.visualization.type === 'scatter' ? 'scatter' : props.visualization.type
-      }
-    ]
-  }
+        type: props.visualization.type === "scatter" ? "scatter" : props.visualization.type,
+      },
+    ],
+  };
 
-  return baseOption
-})
+  return baseOption;
+});
 </script>
 
 <style scoped>
