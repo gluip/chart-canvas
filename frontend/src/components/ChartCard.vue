@@ -2,6 +2,7 @@
   <div class="chart-card">
     <div class="chart-header">
       <h3>{{ visualization.title || visualization.type }}</h3>
+      <p v-if="visualization.description" class="description">{{ visualization.description }}</p>
     </div>
     <div class="chart-body">
       <v-chart :option="chartOption" autoresize />
@@ -84,11 +85,18 @@ const chartOption = computed(() => {
 }
 
 .chart-header h3 {
-  margin: 0;
+  margin: 0 0 4px 0;
   font-size: 14px;
   font-weight: 600;
   color: #333;
   text-transform: capitalize;
+}
+
+.chart-header .description {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
 }
 
 .chart-body {

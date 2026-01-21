@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, watch } from "vue";
 import { GridLayout, GridItem } from "grid-layout-plus";
 import ChartCard from "./ChartCard.vue";
 import type { VisualizationData } from "@/types/canvas";
@@ -45,6 +45,21 @@ const layout = ref(
     h: v.h,
     i: v.id,
   })),
+);
+
+// Watch for changes in visualizations and update layout
+watch(
+  () => props.visualizations,
+  (newViz) => {
+    layout.value = newViz.map((v) => ({
+      x: v.x,
+      y: v.y,
+      w: v.w,
+      h: v.h,
+      i: v.id,
+    }));
+  },
+  { deep: true }
 );
 
 const getVisualization = (id: string) => {
