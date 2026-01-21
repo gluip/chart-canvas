@@ -19,7 +19,10 @@
         :h="item.h"
         :i="item.i"
       >
-        <ChartCard v-if="getVisualization(item.i).type !== 'table'" :visualization="getVisualization(item.i)" />
+        <ChartCard
+          v-if="getVisualization(item.i).type !== 'table'"
+          :visualization="getVisualization(item.i)"
+        />
         <TableCard v-else :visualization="getVisualization(item.i)" />
       </grid-item>
     </grid-layout>

@@ -41,7 +41,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 properties: {
                   name: {
                     type: "string",
-                    description: "Name of the series (e.g., '2015', 'Product A')",
+                    description:
+                      "Name of the series (e.g., '2015', 'Product A')",
                   },
                   data: {
                     type: "array",
@@ -51,12 +52,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                       minItems: 2,
                       maxItems: 2,
                     },
-                    description: "Array of [x, y] coordinate pairs for this series",
+                    description:
+                      "Array of [x, y] coordinate pairs for this series",
                   },
                 },
                 required: ["name", "data"],
               },
-              description: "Array of data series to display (required for charts)",
+              description:
+                "Array of data series to display (required for charts)",
             },
             table: {
               type: "object",
@@ -136,7 +139,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         xLabels?: string[];
       };
 
-      const viz = stateManager.addVisualization({ type, series, table, title, description, xLabels });
+      const viz = stateManager.addVisualization({
+        type,
+        series,
+        table,
+        title,
+        description,
+        xLabels,
+      });
 
       return {
         content: [
