@@ -94,7 +94,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         description?: string;
       };
 
-      const viz = stateManager.addVisualization({ type, points, title, description });
+      const viz = stateManager.addVisualization({
+        type,
+        points,
+        title,
+        description,
+      });
 
       return {
         content: [

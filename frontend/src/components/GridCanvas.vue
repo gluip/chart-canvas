@@ -59,7 +59,7 @@ watch(
       i: v.id,
     }));
   },
-  { deep: true }
+  { deep: true },
 );
 
 const getVisualization = (id: string) => {
