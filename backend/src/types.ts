@@ -4,6 +4,7 @@ export interface VisualizationData {
   points: [number, number][];
   title?: string;
   description?: string;
+  xLabels?: string[];
   x: number;
   y: number;
   w: number;

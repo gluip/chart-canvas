@@ -36,7 +36,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const chartOption = computed(() => {
-  const xData = props.visualization.points.map((p) => p[0]);
+  const xData = props.visualization.xLabels || props.visualization.points.map((p) => p[0]);
   const yData = props.visualization.points.map((p) => p[1]);
 
   const baseOption = {

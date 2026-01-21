@@ -52,6 +52,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               type: "string",
               description: "Optional description or explanation for the chart",
             },
+            xLabels: {
+              type: "array",
+              items: { type: "string" },
+              description: "Optional labels for the x-axis (e.g., dates). Should match the number of data points.",
+            },
           },
           required: ["type", "points"],
         },
@@ -87,19 +92,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   switch (name) {
     case "addVisualization": {
-      const { type, points, title, description } = args as {
+      const { type, points, title, description, xLabels } = args as {
         type: "line" | "bar" | "scatter";
         points: [number, number][];
         title?: string;
         description?: string;
+        xLabels?: string[];
       };
 
-      const viz = stateManager.addVisualization({
-        type,
-        points,
-        title,
-        description,
-      });
+      const viz = stateManager.addVisualization({ type, points, title, description, xLabels });
 
       return {
         content: [
