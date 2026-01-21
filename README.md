@@ -10,20 +10,7 @@ Een MCP server die LLMs de mogelijkheid biedt om visualisaties (grafieken) te to
 
 ## Quick Start
 
-### 1. Start Backend
-
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-Backend draait op:
-
-- MCP server: stdio
-- API: http://localhost:3000
-
-### 2. Start Frontend
+### 1. Start Frontend
 
 ```bash
 cd frontend
@@ -33,9 +20,9 @@ npm run dev
 
 Frontend draait op: http://localhost:5173
 
-### 3. Configureer MCP Client
+### 2. Configureer MCP Client
 
-Voeg toe aan je MCP client configuratie (bijv. Claude Desktop):
+Voeg toe aan je MCP client configuratie (bijv. Claude Desktop). De MCP server start automatisch de backend:
 
 ```json
 {
