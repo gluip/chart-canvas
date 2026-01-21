@@ -3,10 +3,16 @@ export interface SeriesData {
   data: [number, number][];
 }
 
+export interface TableData {
+  headers: string[];
+  rows: (string | number)[][];
+}
+
 export interface VisualizationData {
   id: string;
-  type: "line" | "bar" | "scatter";
-  series: SeriesData[];
+  type: "line" | "bar" | "scatter" | "table";
+  series?: SeriesData[];
+  table?: TableData;
   title?: string;
   description?: string;
   xLabels?: string[];
