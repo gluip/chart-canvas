@@ -129,7 +129,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "showCanvas",
-        description: "Open the canvas in a browser window to view visualizations",
+        description:
+          "Open the canvas in a browser window to view visualizations",
         inputSchema: {
           type: "object",
           properties: {},
