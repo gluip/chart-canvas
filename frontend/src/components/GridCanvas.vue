@@ -20,7 +20,7 @@
         :i="item.i"
       >
         <ChartCard
-          v-if="['line', 'bar', 'scatter'].includes(getVisualization(item.i).type)"
+          v-if="['line', 'bar', 'scatter', 'pie'].includes(getVisualization(item.i).type)"
           :visualization="getVisualization(item.i)"
         />
         <TableCard
@@ -60,17 +60,28 @@ const layout = ref(
   })),
 );
 
-// Watch for changes in visualizations and update layout
+// Smart merge: only add new items or remove deleted ones, keep existing positions
 watch(
   () => props.visualizations,
   (newViz) => {
-    layout.value = newViz.map((v) => ({
-      x: v.x,
-      y: v.y,
-      w: v.w,
-      h: v.h,
-      i: v.id,
-    }));
+    const currentIds = new Set(layout.value.map((item) => item.i));
+    const newIds = new Set(newViz.map((v) => v.id));
+
+    // Remove deleted items
+    layout.value = layout.value.filter((item) => newIds.has(item.i));
+
+    // Add new items only (don't update existing positions/sizes)
+    newViz.forEach((v) => {
+      if (!currentIds.has(v.id)) {
+        layout.value.push({
+          x: v.x,
+          y: v.y,
+          w: v.w,
+          h: v.h,
+          i: v.id,
+        });
+      }
+    });
   },
   { deep: true },
 );

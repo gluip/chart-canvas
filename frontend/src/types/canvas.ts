@@ -10,7 +10,7 @@ export interface TableData {
 
 export interface VisualizationData {
   id: string;
-  type: "line" | "bar" | "scatter" | "table" | "flowchart";
+  type: "line" | "bar" | "scatter" | "table" | "flowchart" | "pie";
   series?: SeriesData[];
   table?: TableData;
   mermaid?: string;

@@ -14,8 +14,8 @@
 import { computed } from "vue";
 import { use } from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
-import { LineChart, BarChart, ScatterChart } from "echarts/charts";
-import { GridComponent, TooltipComponent, TitleComponent } from "echarts/components";
+import { LineChart, BarChart, ScatterChart, PieChart } from "echarts/charts";
+import { GridComponent, TooltipComponent, TitleComponent, LegendComponent } from "echarts/components";
 import VChart from "vue-echarts";
 import type { VisualizationData } from "@/types/canvas";
 
@@ -24,9 +24,11 @@ use([
   LineChart,
   BarChart,
   ScatterChart,
+  PieChart,
   GridComponent,
   TooltipComponent,
   TitleComponent,
+  LegendComponent,
 ]);
 
 interface Props {
@@ -36,11 +38,45 @@ interface Props {
 const props = defineProps<Props>();
 
 const chartOption = computed(() => {
+  // Pie chart has different structure
+  if (props.visualization.type === "pie") {
+    return {
+      tooltip: {
+        trigger: "item",
+        formatter: "{a} <br/>{b}: {c} ({d}%)",
+      },
+      legend: {
+        orient: "vertical",
+        left: "left",
+      },
+      series: [
+        {
+          name: props.visualization.title || "Data",
+          type: "pie",
+          radius: "65%",
+          center: ["50%", "55%"],
+          data: props.visualization.series?.[0]?.data.map((p) => ({
+            name: props.visualization.xLabels?.[p[0]] || `Item ${p[0]}`,
+            value: p[1],
+          })) || [],
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: "rgba(0, 0, 0, 0.5)",
+            },
+          },
+        },
+      ],
+    };
+  }
+
+  // Regular charts (line, bar, scatter)
   // Use xLabels or generate from first series data
-  const xData = props.visualization.xLabels || props.visualization.series[0].data.map((p) => p[0]);
+  const xData = props.visualization.xLabels || props.visualization.series?.[0]?.data.map((p) => p[0]) || [];
 
   // Map series to ECharts format
-  const seriesData = props.visualization.series.map((s) => ({
+  const seriesData = props.visualization.series?.map((s) => ({
     name: s.name,
     type: props.visualization.type === "scatter" ? "scatter" : props.visualization.type,
     data: s.data.map((p) => p[1]),
@@ -51,14 +87,14 @@ const chartOption = computed(() => {
       trigger: "axis",
     },
     legend: {
-      data: props.visualization.series.map((s) => s.name),
+      data: props.visualization.series?.map((s) => s.name) || [],
       top: 0,
     },
     grid: {
       left: "10%",
       right: "5%",
       bottom: "15%",
-      top: props.visualization.series.length > 1 ? "15%" : "10%",
+      top: (props.visualization.series?.length || 0) > 1 ? "15%" : "10%",
     },
     xAxis: {
       type: "category",

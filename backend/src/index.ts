@@ -31,7 +31,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {
             type: {
               type: "string",
-              enum: ["line", "bar", "scatter", "table", "flowchart"],
+              enum: ["line", "bar", "scatter", "table", "flowchart", "pie"],
               description: "Type of visualization to create",
             },
             series: {
@@ -137,7 +137,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     case "addVisualization": {
       const { type, series, table, mermaid, title, description, xLabels } =
         args as {
-          type: "line" | "bar" | "scatter" | "table" | "flowchart";
+          type: "line" | "bar" | "scatter" | "table" | "flowchart" | "pie";
           series?: { name: string; data: [number, number][] }[];
           table?: { headers: string[]; rows: (string | number)[][] };
           mermaid?: string;

@@ -5,11 +5,16 @@ export const mockCanvasState: CanvasState = {
     {
       id: "1",
       type: "line",
-      points: [
-        [1, 2],
-        [2, 3],
-        [4, 0],
-        [5, 5],
+      series: [
+        {
+          name: "Data",
+          data: [
+            [1, 2],
+            [2, 3],
+            [4, 0],
+            [5, 5],
+          ],
+        },
       ],
       title: "Sample Line Chart",
       x: 0,
@@ -20,11 +25,16 @@ export const mockCanvasState: CanvasState = {
     {
       id: "2",
       type: "bar",
-      points: [
-        [1, 5],
-        [2, 8],
-        [3, 3],
-        [4, 7],
+      series: [
+        {
+          name: "Data",
+          data: [
+            [1, 5],
+            [2, 8],
+            [3, 3],
+            [4, 7],
+          ],
+        },
       ],
       title: "Sample Bar Chart",
       x: 6,
@@ -35,12 +45,17 @@ export const mockCanvasState: CanvasState = {
     {
       id: "3",
       type: "scatter",
-      points: [
-        [1, 3],
-        [2, 5],
-        [3, 2],
-        [4, 6],
-        [5, 4],
+      series: [
+        {
+          name: "Data",
+          data: [
+            [1, 3],
+            [2, 5],
+            [3, 2],
+            [4, 6],
+            [5, 4],
+          ],
+        },
       ],
       title: "Sample Scatter Plot",
       x: 0,
