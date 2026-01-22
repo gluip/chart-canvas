@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import GridCanvas from "./components/GridCanvas.vue";
 import { pollCanvasState } from "./services/api";
 import type { VisualizationData } from "./types/canvas";
@@ -13,6 +13,19 @@ onMounted(() => {
     visualizations.value = state.visualizations;
   });
 });
+
+// Update page title based on first visualization
+watch(
+  () => visualizations.value,
+  (newViz) => {
+    if (newViz.length > 0 && newViz[0].title) {
+      document.title = newViz[0].title;
+    } else {
+      document.title = "chat-canvas";
+    }
+  },
+  { deep: true }
+);
 
 onUnmounted(() => {
   if (stopPolling) stopPolling();
