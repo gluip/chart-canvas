@@ -1,8 +1,19 @@
 <template>
   <div class="flowchart-card">
-    <div v-if="visualization.title" class="card-title">{{ visualization.title }}</div>
-    <div v-if="visualization.description" class="card-description">
-      {{ visualization.description }}
+    <div class="card-header">
+      <div>
+        <div v-if="visualization.title" class="card-title">{{ visualization.title }}</div>
+        <div v-if="visualization.description" class="card-description">
+          {{ visualization.description }}
+        </div>
+      </div>
+      <button @click="openInMermaidEditor" class="editor-button" title="Open in Mermaid Live Editor">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+      </button>
     </div>
     <div class="mermaid-container">
       <div ref="mermaidEl" class="mermaid-diagram"></div>
@@ -21,6 +32,20 @@ interface Props {
 
 const props = defineProps<Props>();
 const mermaidEl = ref<HTMLElement | null>(null);
+
+const openInMermaidEditor = () => {
+  if (!props.visualization.mermaid) return;
+  
+  // Encode Mermaid syntax to base64 for Mermaid Live Editor
+  const encoded = btoa(JSON.stringify({
+    code: props.visualization.mermaid,
+    mermaid: { theme: 'default' }
+  }));
+  
+  // Open in Mermaid Live Editor
+  const url = `https://mermaid.live/edit#base64:${encoded}`;
+  window.open(url, '_blank');
+};
 
 // Initialize mermaid with custom theme
 mermaid.initialize({
@@ -74,17 +99,47 @@ watch(
   overflow: hidden;
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
 .card-title {
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 8px;
   color: #333;
 }
 
 .card-description {
   font-size: 13px;
   color: #666;
-  margin-bottom: 12px;
+  margin-top: 4px;
+}
+
+.editor-button {
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.editor-button:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.editor-button:active {
+  transform: translateY(0);
 }
 
 .mermaid-container {
