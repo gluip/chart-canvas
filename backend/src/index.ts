@@ -6,6 +6,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { stateManager } from "./state.js";
 import { startApiServer } from "./api.js";
+import open from "open";
 
 const server = new Server(
   {
@@ -126,6 +127,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {},
         },
       },
+      {
+        name: "showCanvas",
+        description: "Open the canvas in a browser window to view visualizations",
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
+      },
     ],
   };
 });
@@ -193,6 +202,29 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           },
         ],
       };
+    }
+
+    case "showCanvas": {
+      try {
+        await open("http://localhost:3000");
+        return {
+          content: [
+            {
+              type: "text",
+              text: "Opened canvas in browser at http://localhost:3000",
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Failed to open browser: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+        };
+      }
     }
 
     default:
