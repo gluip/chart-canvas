@@ -6,7 +6,7 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { stateManager } from "./state.js";
-import { startApiServer } from "./api.js";
+import { startApiServer, getServerPort } from "./api.js";
 import open from "open";
 
 const server = new Server(
@@ -167,11 +167,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         xLabels,
       });
 
+      const port = getServerPort() || 3000;
       return {
         content: [
           {
             type: "text",
-            text: `Added ${type} chart with ID ${viz.id}. View it at http://localhost:3000`,
+            text: `Added ${type} chart with ID ${viz.id}. View it at http://localhost:${port}`,
           },
         ],
       };
@@ -208,12 +209,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     case "showCanvas": {
       try {
-        await open("http://localhost:3000");
+        const port = getServerPort() || 3000;
+        const url = `http://localhost:${port}`;
+        await open(url);
         return {
           content: [
             {
               type: "text",
-              text: "Opened canvas in browser at http://localhost:3000",
+              text: `Opened canvas in browser at ${url}`,
             },
           ],
         };
@@ -236,14 +239,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 async function main() {
   // Start the API server for frontend
-  startApiServer();
+  await startApiServer();
 
   // Start MCP server on stdio
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
   console.error("Chart Canvas MCP Server running");
-  console.error("API server running on http://localhost:3000");
 }
 
 main().catch((error) => {

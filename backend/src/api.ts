@@ -3,13 +3,37 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import { stateManager } from "./state.js";
+import { createServer } from "http";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export function startApiServer() {
+let serverPort: number | null = null;
+
+export function getServerPort(): number | null {
+  return serverPort;
+}
+
+async function findAvailablePort(startPort: number): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const server = createServer();
+    server.listen(startPort, () => {
+      const port = (server.address() as any).port;
+      server.close(() => resolve(port));
+    });
+    server.on("error", (err: any) => {
+      if (err.code === "EADDRINUSE") {
+        resolve(findAvailablePort(startPort + 1));
+      } else {
+        reject(err);
+      }
+    });
+  });
+}
+
+export async function startApiServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = await findAvailablePort(3000);
 
   app.use(cors());
   app.use(express.json());
@@ -33,6 +57,7 @@ export function startApiServer() {
   });
 
   app.listen(PORT, () => {
+    serverPort = PORT;
     console.error(`Server running on http://localhost:${PORT}`);
     console.error(`- API: http://localhost:${PORT}/state`);
     console.error(`- Frontend: http://localhost:${PORT}`);
