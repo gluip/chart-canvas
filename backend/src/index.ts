@@ -245,7 +245,7 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
-  console.error("Chart Canvas MCP Server running");
+  console.log("Chart Canvas MCP Server running");
 }
 
 main().catch((error) => {

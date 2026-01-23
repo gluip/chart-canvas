@@ -1,6 +1,7 @@
 import type { CanvasState } from "@/types/canvas";
 
-const API_URL = "http://localhost:3000";
+// Use relative URL so it works with whatever port the server is running on
+const API_URL = "";
 
 export async function fetchCanvasState(): Promise<CanvasState> {
   const response = await fetch(`${API_URL}/state`);
