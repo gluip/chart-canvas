@@ -24,7 +24,7 @@ watch(
       document.title = "chat-canvas";
     }
   },
-  { deep: true }
+  { deep: true },
 );
 
 onUnmounted(() => {

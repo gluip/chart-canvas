@@ -1,11 +1,15 @@
 {
   "servers": {
+    // "chart-canvas": {
+    //   "command": "/Users/martijn/.nvm/versions/node/v20.18.0/bin/node",
+    //   "args": [
+    //     "/Users/martijn/Code/chat-canvas/backend/node_modules/.bin/tsx",
+    //     "/Users/martijn/Code/chat-canvas/backend/src/index.ts"
+    //   ]
+    // },
+
     "chart-canvas": {
-      "command": "/Users/martijn/.nvm/versions/node/v20.18.0/bin/node",
-      "args": [
-        "/Users/martijn/Code/chat-canvas/backend/node_modules/.bin/tsx",
-        "/Users/martijn/Code/chat-canvas/backend/src/index.ts"
-      ]
+      "command": "chart-canvas-mcp"
     }
   }
 }

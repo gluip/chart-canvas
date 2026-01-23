@@ -1,8 +1,33 @@
 {
-  "name": "chart-canvas-server",
+  "name": "@gluip/chart-canvas-mcp",
   "version": "0.1.0",
+  "description": "MCP server for creating interactive visualizations (charts, diagrams, tables) through AI assistants",
+  "author": "Martijn",
+  "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "chart-canvas-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "visualization",
+    "charts",
+    "echarts",
+    "mermaid",
+    "ai",
+    "llm"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/martijn/chart-canvas.git"
+  },
   "scripts": {
     "build": "tsc",
     "build:all": "npm run build && cd ../frontend && npm run build",

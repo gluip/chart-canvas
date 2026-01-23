@@ -1,0 +1,36 @@
+# Development files
+src/
+tsconfig.json
+*.ts
+!*.d.ts
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+*.tsbuildinfo
+
+# Tests
+test/
+tests/
+*.test.ts
+*.spec.ts
+
+# Development tools
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.*
+
+# Frontend (not needed in NPM package)
+../frontend/
+
+# Misc
+.DS_Store
