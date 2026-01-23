@@ -4,6 +4,12 @@
 
 Create beautiful charts, diagrams, and tables directly from your AI conversations. Chart Canvas provides a real-time dashboard that displays visualizations as you work with LLMs like Claude.
 
+## Demo
+
+[![Chart Canvas Demo](https://img.youtube.com/vi/XVucQstPisc/maxresdefault.jpg)](https://www.youtube.com/watch?v=XVucQstPisc)
+
+Watch the [full demo on YouTube](https://www.youtube.com/watch?v=XVucQstPisc) to see Chart Canvas in action!
+
 ## Features
 
 ✨ **Multiple Chart Types**: Line, bar, scatter, pie charts, tables, and Mermaid diagrams  
