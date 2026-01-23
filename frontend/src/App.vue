@@ -18,7 +18,7 @@ onMounted(() => {
 watch(
   () => visualizations.value,
   (newViz) => {
-    if (newViz.length > 0 && newViz[0].title) {
+    if (newViz.length > 0 && newViz[0]?.title) {
       document.title = newViz[0].title;
     } else {
       document.title = "chat-canvas";
