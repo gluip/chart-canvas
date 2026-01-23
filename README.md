@@ -18,13 +18,13 @@ Create beautiful charts, diagrams, and tables directly from your AI conversation
 ### Installation
 
 ```bash
-npm install -g @martijn/chart-canvas-mcp
+npm install -g @gluip/chart-canvas-mcp
 ```
 
 Or use directly with npx (no installation needed):
 
 ```bash
-npx @martijn/chart-canvas-mcp
+npx @gluip/chart-canvas-mcp
 ```
 
 ### Configuration
@@ -39,7 +39,7 @@ Add to your MCP client configuration (e.g., Claude Desktop):
   "mcpServers": {
     "chart-canvas": {
       "command": "npx",
-      "args": ["-y", "@martijn/chart-canvas-mcp"]
+      "args": ["-y", "@gluip/chart-canvas-mcp"]
     }
   }
 }
@@ -115,7 +115,7 @@ Open the dashboard in your default browser.
 
 ```bash
 # Clone repository
-git clone https://github.com/martijn/chart-canvas.git
+git clone https://github.com/gluip/chart-canvas.git
 cd chart-canvas
 
 # Install backend dependencies
@@ -163,6 +163,6 @@ MIT © 2026 Martijn
 
 ## Links
 
-- [NPM Package](https://www.npmjs.com/package/@martijn/chart-canvas-mcp)
-- [GitHub Repository](https://github.com/martijn/chart-canvas)
+- [NPM Package](https://www.npmjs.com/package/@gluip/chart-canvas-mcp)
+- [GitHub Repository](https://github.com/gluip/chart-canvas)
 - [Model Context Protocol](https://modelcontextprotocol.io)

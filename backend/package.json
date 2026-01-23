@@ -1,6 +1,6 @@
 {
   "name": "@gluip/chart-canvas-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for creating interactive visualizations (charts, diagrams, tables) through AI assistants",
   "author": "Martijn",
   "license": "MIT",
@@ -26,7 +26,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/martijn/chart-canvas.git"
+    "url": "https://github.com/gluip/chart-canvas.git"
   },
   "scripts": {
     "build": "tsc",
