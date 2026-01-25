@@ -1,6 +1,6 @@
-import Database from "better-sqlite3";
+import { DuckDBInstance } from "@duckdb/node-api";
 import { existsSync } from "fs";
-import { resolve } from "path";
+import { resolve, extname } from "path";
 
 export interface ColumnInfo {
   name: string;
@@ -35,23 +35,53 @@ const FORBIDDEN_KEYWORDS = [
   "REPLACE",
   "ATTACH",
   "DETACH",
-  "PRAGMA",
 ];
 
 const MAX_ROWS = 10000;
 const QUERY_TIMEOUT_MS = 5000;
 
+type FileType = "sqlite" | "csv" | "parquet" | "json" | "ndjson" | "unknown";
+
 /**
- * Validate database path - must exist and be a file
+ * Validate database/file path - must exist and be a file
  */
 export function validateDatabasePath(dbPath: string): string {
   const resolvedPath = resolve(dbPath);
 
   if (!existsSync(resolvedPath)) {
-    throw new Error(`Database file does not exist: ${dbPath}`);
+    throw new Error(`File does not exist: ${dbPath}`);
   }
 
   return resolvedPath;
+}
+
+/**
+ * Detect file type based on extension
+ */
+export function getFileType(filePath: string): FileType {
+  const ext = extname(filePath).toLowerCase();
+
+  if (ext === ".db" || ext === ".sqlite" || ext === ".sqlite3") {
+    return "sqlite";
+  }
+
+  if (ext === ".csv") {
+    return "csv";
+  }
+
+  if (ext === ".parquet") {
+    return "parquet";
+  }
+
+  if (ext === ".json") {
+    return "json";
+  }
+
+  if (ext === ".jsonl" || ext === ".ndjson") {
+    return "ndjson";
+  }
+
+  return "unknown";
 }
 
 /**
@@ -75,83 +105,211 @@ export function validateReadOnlyQuery(sql: string): void {
 }
 
 /**
- * Get database schema for all tables
+ * Get the DuckDB read function for a file type
  */
-export function getDatabaseSchema(dbPath: string): DatabaseSchema {
-  const resolvedPath = validateDatabasePath(dbPath);
-  const db = new Database(resolvedPath, { readonly: true });
+function getReadFunction(filePath: string, fileType: FileType): string {
+  const escapedPath = filePath.replace(/'/g, "''");
 
-  try {
-    // Get all table names (excluding sqlite internal tables)
-    const tables = db
-      .prepare(
-        `SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name`,
-      )
-      .all() as { name: string }[];
-
-    const schema: DatabaseSchema = {
-      tables: [],
-    };
-
-    // Get columns for each table
-    for (const table of tables) {
-      const columns = db
-        .prepare(`PRAGMA table_info(${table.name})`)
-        .all() as any[];
-
-      schema.tables.push({
-        name: table.name,
-        columns: columns.map((col) => ({
-          name: col.name,
-          type: col.type,
-          notNull: col.notnull === 1,
-          defaultValue: col.dflt_value,
-          primaryKey: col.pk === 1,
-        })),
-      });
-    }
-
-    return schema;
-  } finally {
-    db.close();
+  switch (fileType) {
+    case "sqlite":
+      // For SQLite, we'll attach the database
+      return `sqlite_scan('${escapedPath}', '')`;
+    case "csv":
+      return `read_csv_auto('${escapedPath}')`;
+    case "parquet":
+      return `read_parquet('${escapedPath}')`;
+    case "json":
+      return `read_json_auto('${escapedPath}')`;
+    case "ndjson":
+      return `read_json_auto('${escapedPath}', format='newline_delimited')`;
+    default:
+      throw new Error(
+        `Unsupported file type. Supported: .db/.sqlite/.sqlite3 (SQLite), .csv, .parquet, .json, .jsonl/.ndjson`,
+      );
   }
 }
 
 /**
- * Execute a SQL query with timeout and row limit
+ * Get table name from file path
  */
-export function executeQuery(dbPath: string, sql: string): QueryResult {
-  const resolvedPath = validateDatabasePath(dbPath);
-  validateReadOnlyQuery(sql);
+function getTableName(filePath: string): string {
+  return (
+    filePath
+      .split("/")
+      .pop()
+      ?.replace(/\.(db|sqlite|sqlite3|csv|parquet|json|jsonl|ndjson)$/i, "") ||
+    "data"
+  );
+}
 
-  const db = new Database(resolvedPath, {
-    readonly: true,
-    timeout: QUERY_TIMEOUT_MS,
-  });
+/**
+ * Get database/file schema using DuckDB
+ */
+export async function getDatabaseSchema(
+  dbPath: string,
+): Promise<DatabaseSchema> {
+  const resolvedPath = validateDatabasePath(dbPath);
+  const fileType = getFileType(resolvedPath);
+
+  if (fileType === "unknown") {
+    throw new Error(
+      `Unsupported file type. Supported: .db/.sqlite/.sqlite3 (SQLite), .csv, .parquet, .json, .jsonl/.ndjson`,
+    );
+  }
+
+  const instance = await DuckDBInstance.create(":memory:");
+  const conn = await instance.connect();
 
   try {
-    // Prepare and execute query
-    const stmt = db.prepare(sql);
-    const rows = stmt.all() as Record<string, any>[];
+    // For SQLite, we need to install and load the sqlite extension
+    if (fileType === "sqlite") {
+      await conn.run("INSTALL sqlite");
+      await conn.run("LOAD sqlite");
+    }
 
-    // Check row limit
-    if (rows.length > MAX_ROWS) {
-      throw new Error(
-        `Query returned ${rows.length} rows, exceeding limit of ${MAX_ROWS}`,
+    const readFunc = getReadFunction(resolvedPath, fileType);
+    const tableName = getTableName(resolvedPath);
+
+    // For SQLite, we need to query the sqlite_master table
+    if (fileType === "sqlite") {
+      const escapedPath = resolvedPath.replace(/'/g, "''");
+
+      // Get table names
+      const tablesReader = await conn.runAndReadAll(
+        `SELECT name FROM sqlite_scan('${escapedPath}', 'sqlite_master') WHERE type='table' AND name NOT LIKE 'sqlite_%'`,
+      );
+
+      const tables = tablesReader.getRowObjects() as any[];
+
+      if (!tables || tables.length === 0) {
+        return { tables: [] };
+      }
+
+      // Get columns for each table
+      const tableSchemas: TableSchema[] = [];
+
+      for (const table of tables) {
+        const columnsReader = await conn.runAndReadAll(
+          `DESCRIBE SELECT * FROM sqlite_scan('${escapedPath}', '${table.name}') LIMIT 0`,
+        );
+
+        const columns = columnsReader.getRowObjects() as any[];
+
+        tableSchemas.push({
+          name: table.name,
+          columns: columns.map((col) => ({
+            name: col.column_name,
+            type: col.column_type,
+            notNull: false,
+            defaultValue: null,
+            primaryKey: false,
+          })),
+        });
+      }
+
+      return { tables: tableSchemas };
+    } else {
+      // For file-based formats (CSV, Parquet, JSON)
+      const reader = await conn.runAndReadAll(
+        `DESCRIBE SELECT * FROM ${readFunc} LIMIT 0`,
+      );
+
+      const columns = reader.getRowObjects() as any[];
+
+      const columnInfos: ColumnInfo[] = columns.map((col) => ({
+        name: col.column_name,
+        type: col.column_type,
+        notNull: false,
+        defaultValue: null,
+        primaryKey: false,
+      }));
+
+      return {
+        tables: [
+          {
+            name: tableName,
+            columns: columnInfos,
+          },
+        ],
+      };
+    }
+  } finally {
+    conn.closeSync();
+    instance.closeSync();
+  }
+}
+
+/**
+ * Execute a SQL query using DuckDB
+ */
+export async function executeQuery(
+  dbPath: string,
+  sql: string,
+): Promise<QueryResult> {
+  const resolvedPath = validateDatabasePath(dbPath);
+  const fileType = getFileType(resolvedPath);
+  validateReadOnlyQuery(sql);
+
+  if (fileType === "unknown") {
+    throw new Error(
+      `Unsupported file type. Supported: .db/.sqlite/.sqlite3 (SQLite), .csv, .parquet, .json, .jsonl/.ndjson`,
+    );
+  }
+
+  const instance = await DuckDBInstance.create(":memory:");
+  const conn = await instance.connect();
+
+  try {
+    // For SQLite, install and load the extension first
+    if (fileType === "sqlite") {
+      await conn.run("INSTALL sqlite");
+      await conn.run("LOAD sqlite");
+    }
+
+    const readFunc = getReadFunction(resolvedPath, fileType);
+    const tableName = getTableName(resolvedPath);
+
+    // Replace table references with read function calls
+    let modifiedSql = sql;
+
+    // For SQLite, don't modify - queries reference tables directly via sqlite_scan
+    if (fileType !== "sqlite") {
+      modifiedSql = sql.replace(
+        new RegExp(`\\b${tableName}\\b`, "gi"),
+        readFunc,
       );
     }
 
-    // Get column names from first row or statement columns
-    const columns =
-      rows.length > 0
-        ? Object.keys(rows[0])
-        : stmt.columns().map((c) => c.name);
+    const reader = await conn.runAndReadAll(modifiedSql);
+    const rawRows = reader.getRowObjects() as any[];
+
+    if (rawRows.length > MAX_ROWS) {
+      throw new Error(
+        `Query returned ${rawRows.length} rows, exceeding limit of ${MAX_ROWS}`,
+      );
+    }
+
+    // Convert BigInt values to numbers for JSON serialization
+    const rows = rawRows.map((row) => {
+      const converted: Record<string, any> = {};
+      for (const [key, value] of Object.entries(row)) {
+        if (typeof value === "bigint") {
+          converted[key] = Number(value);
+        } else {
+          converted[key] = value;
+        }
+      }
+      return converted;
+    });
+
+    const columns = reader.columnNames();
 
     return {
       rows,
       columns,
     };
   } finally {
-    db.close();
+    conn.closeSync();
+    instance.closeSync();
   }
 }

@@ -16,10 +16,23 @@ Watch the [full demo on YouTube](https://www.youtube.com/watch?v=XVucQstPisc) to
 🎨 **Interactive Dashboard**: Drag-and-drop grid layout with real-time updates  
 🔄 **Live Synchronization**: Changes appear instantly in your browser  
 📊 **Rich Visualizations**: Powered by ECharts and Mermaid  
-�️ **SQL Database Integration**: Query SQLite databases directly and visualize results  
-⚡ **Smart Data Flow**: Execute queries server-side without passing data through LLM  
-�🚀 **Easy Setup**: One command to get started  
+💾 **Universal Data Sources**: Query SQLite, CSV, Parquet, JSON, and NDJSON files directly  
+⚡ **Smart Data Flow**: Execute queries server-side - data stays local, never sent to LLM  
+🔒 **Privacy First**: Your data never leaves your machine  
+🚀 **Easy Setup**: One command to get started  
 🌐 **Production Ready**: Built-in production mode with optimized builds
+
+## Supported Data Sources
+
+Chart Canvas can query and visualize data from multiple file formats:
+
+- **SQLite** (`.db`, `.sqlite`, `.sqlite3`) - Relational databases
+- **CSV** (`.csv`) - Comma-separated values
+- **Parquet** (`.parquet`) - Columnar storage format
+- **JSON** (`.json`) - JSON arrays of objects
+- **NDJSON** (`.jsonl`, `.ndjson`) - Newline-delimited JSON
+
+**Privacy & Performance**: All queries execute locally on your machine using DuckDB. Query results are transformed into visualizations server-side - only metadata (chart configuration) is sent to the LLM, never your actual data. This makes it fast, scalable, and private.
 
 ## Quick Start
 

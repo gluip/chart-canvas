@@ -128,6 +128,81 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: "updateVisualization",
+        description:
+          "Update an existing visualization on the canvas. You can change its data, title, description, or any other property.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+              description: "ID of the visualization to update",
+            },
+            type: {
+              type: "string",
+              enum: ["line", "bar", "scatter", "table", "flowchart", "pie"],
+              description: "Type of visualization",
+            },
+            series: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  data: {
+                    type: "array",
+                    items: {
+                      type: "array",
+                      items: { type: "number" },
+                      minItems: 2,
+                      maxItems: 2,
+                    },
+                  },
+                },
+                required: ["name", "data"],
+              },
+              description: "Updated data series for charts",
+            },
+            table: {
+              type: "object",
+              properties: {
+                headers: {
+                  type: "array",
+                  items: { type: "string" },
+                },
+                rows: {
+                  type: "array",
+                  items: {
+                    type: "array",
+                    items: { type: ["string", "number"] },
+                  },
+                },
+              },
+              required: ["headers", "rows"],
+              description: "Updated table data",
+            },
+            mermaid: {
+              type: "string",
+              description: "Updated Mermaid diagram syntax",
+            },
+            title: {
+              type: "string",
+              description: "Updated title",
+            },
+            description: {
+              type: "string",
+              description: "Updated description",
+            },
+            xLabels: {
+              type: "array",
+              items: { type: "string" },
+              description: "Updated x-axis labels",
+            },
+          },
+          required: ["id"],
+        },
+      },
+      {
         name: "clearCanvas",
         description: "Remove all visualizations from the canvas",
         inputSchema: {
@@ -147,14 +222,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "getDatabaseSchema",
         description:
-          "Get the schema of a SQLite database including all tables and columns. Use this to understand the database structure before writing queries.",
+          "Get the schema of a data source (SQLite database, CSV, Parquet, or JSON file) including all tables/columns. Use this to understand the data structure before writing queries.",
         inputSchema: {
           type: "object",
           properties: {
             databasePath: {
               type: "string",
               description:
-                "Path to the SQLite database file (e.g., './data/atletiek.db' or '/absolute/path/to/db.sqlite')",
+                "Path to the data file. Supported formats: SQLite (.db, .sqlite, .sqlite3), CSV (.csv), Parquet (.parquet), JSON (.json, .jsonl, .ndjson)",
             },
           },
           required: ["databasePath"],
@@ -163,13 +238,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "queryAndVisualize",
         description:
-          "Execute a SQL query on a SQLite database and create a visualization from the results. The query must be read-only (SELECT only). You must specify how to map columns to the visualization.",
+          "Execute a SQL query on a data source (SQLite, CSV, Parquet, or JSON file) and create a visualization from the results. The query must be read-only (SELECT only). You must specify how to map columns to the visualization.",
         inputSchema: {
           type: "object",
           properties: {
             databasePath: {
               type: "string",
-              description: "Path to the SQLite database file",
+              description: "Path to the data file (SQLite, CSV, Parquet, JSON)",
             },
             query: {
               type: "string",
@@ -284,6 +359,42 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
 
+    case "updateVisualization": {
+      const { id, type, series, table, mermaid, title, description, xLabels } =
+        args as {
+          id: string;
+          type?: "line" | "bar" | "scatter" | "table" | "flowchart" | "pie";
+          series?: { name: string; data: [number, number][] }[];
+          table?: { headers: string[]; rows: (string | number)[][] };
+          mermaid?: string;
+          title?: string;
+          description?: string;
+          xLabels?: string[];
+        };
+
+      const updates: any = {};
+      if (type !== undefined) updates.type = type;
+      if (series !== undefined) updates.series = series;
+      if (table !== undefined) updates.table = table;
+      if (mermaid !== undefined) updates.mermaid = mermaid;
+      if (title !== undefined) updates.title = title;
+      if (description !== undefined) updates.description = description;
+      if (xLabels !== undefined) updates.xLabels = xLabels;
+
+      const updated = stateManager.updateVisualization(id, updates);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: updated
+              ? `Updated visualization ${id}`
+              : `Visualization ${id} not found`,
+          },
+        ],
+      };
+    }
+
     case "clearCanvas": {
       stateManager.clearCanvas();
 
@@ -325,10 +436,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     case "getDatabaseSchema": {
       try {
         const { databasePath } = args as { databasePath: string };
-        const schema = getDatabaseSchema(databasePath);
+        const schema = await getDatabaseSchema(databasePath);
 
         // Format schema as readable text
-        let schemaText = `Database schema for: ${databasePath}\n\n`;
+        let schemaText = `Data source schema for: ${databasePath}\n\n`;
 
         for (const table of schema.tables) {
           schemaText += `Table: ${table.name}\n`;
@@ -361,7 +472,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: "text",
-              text: `Error getting database schema: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error getting data source schema: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
         };
@@ -389,7 +500,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
 
         // Execute query
-        const result = executeQuery(databasePath, query);
+        const result = await executeQuery(databasePath, query);
 
         if (result.rows.length === 0) {
           return {

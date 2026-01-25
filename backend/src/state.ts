@@ -40,6 +40,23 @@ class StateManager {
     return this.state.visualizations.length < initialLength;
   }
 
+  updateVisualization(
+    id: string,
+    updates: Partial<Omit<VisualizationData, "id">>,
+  ): VisualizationData | null {
+    const index = this.state.visualizations.findIndex((v) => v.id === id);
+    if (index === -1) {
+      return null;
+    }
+
+    this.state.visualizations[index] = {
+      ...this.state.visualizations[index],
+      ...updates,
+    };
+
+    return this.state.visualizations[index];
+  }
+
   clearCanvas(): void {
     this.state.visualizations = [];
   }
