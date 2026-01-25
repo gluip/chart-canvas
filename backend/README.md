@@ -16,7 +16,9 @@ Watch the [full demo on YouTube](https://www.youtube.com/watch?v=XVucQstPisc) to
 🎨 **Interactive Dashboard**: Drag-and-drop grid layout with real-time updates  
 🔄 **Live Synchronization**: Changes appear instantly in your browser  
 📊 **Rich Visualizations**: Powered by ECharts and Mermaid  
-🚀 **Easy Setup**: One command to get started  
+�️ **SQL Database Integration**: Query SQLite databases directly and visualize results  
+⚡ **Smart Data Flow**: Execute queries server-side without passing data through LLM  
+�🚀 **Easy Setup**: One command to get started  
 🌐 **Production Ready**: Built-in production mode with optimized builds
 
 ## Quick Start
@@ -68,6 +70,12 @@ Add to your MCP client configuration (e.g., Claude Desktop):
 "Draw a flowchart for the user authentication process"
 
 "Make a table with team member information"
+
+"Show me the database schema for my SQLite database"
+
+"Query the athletes table and show the top 10 with most personal records"
+
+"Create a chart showing sales trends from the database grouped by region"
 ```
 
 ## MCP Tools
