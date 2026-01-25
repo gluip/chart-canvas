@@ -1,6 +1,6 @@
 {
   "name": "@gluip/chart-canvas-mcp",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "MCP server for creating interactive visualizations (charts, diagrams, tables) and querying data sources (SQLite, CSV, Parquet, JSON) through AI assistants",
   "author": "Martijn",
   "license": "MIT",
