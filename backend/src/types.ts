@@ -26,3 +26,28 @@ export interface VisualizationData {
 export interface CanvasState {
   visualizations: VisualizationData[];
 }
+
+// Database types
+export interface ColumnInfo {
+  name: string;
+  type: string;
+  notNull: boolean;
+  defaultValue: string | null;
+  primaryKey: boolean;
+}
+
+export interface TableSchema {
+  name: string;
+  columns: ColumnInfo[];
+}
+
+export interface DatabaseSchema {
+  tables: TableSchema[];
+}
+
+export interface ColumnMapping {
+  xColumn?: string;
+  yColumns?: string[];
+  seriesColumn?: string;
+  groupByColumn?: string;
+}

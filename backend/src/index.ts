@@ -7,6 +7,13 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { stateManager } from "./state.js";
 import { startApiServer, getServerPort } from "./api.js";
+import { getDatabaseSchema, executeQuery } from "./database.js";
+import {
+  transformToTable,
+  transformToSeries,
+  extractXLabels,
+  type ColumnMapping,
+} from "./transformers.js";
 import open from "open";
 
 const server = new Server(
@@ -137,6 +144,89 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {},
         },
       },
+      {
+        name: "getDatabaseSchema",
+        description:
+          "Get the schema of a SQLite database including all tables and columns. Use this to understand the database structure before writing queries.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            databasePath: {
+              type: "string",
+              description:
+                "Path to the SQLite database file (e.g., './data/atletiek.db' or '/absolute/path/to/db.sqlite')",
+            },
+          },
+          required: ["databasePath"],
+        },
+      },
+      {
+        name: "queryAndVisualize",
+        description:
+          "Execute a SQL query on a SQLite database and create a visualization from the results. The query must be read-only (SELECT only). You must specify how to map columns to the visualization.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            databasePath: {
+              type: "string",
+              description: "Path to the SQLite database file",
+            },
+            query: {
+              type: "string",
+              description:
+                "SQL SELECT query to execute (read-only, max 10000 rows)",
+            },
+            visualizationType: {
+              type: "string",
+              enum: ["line", "bar", "scatter", "table", "pie"],
+              description:
+                "Type of visualization to create from the query results",
+            },
+            columnMapping: {
+              type: "object",
+              properties: {
+                xColumn: {
+                  type: "string",
+                  description:
+                    "Column to use for X-axis (required for charts, not needed for table)",
+                },
+                yColumns: {
+                  type: "array",
+                  items: { type: "string" },
+                  description:
+                    "Column(s) to use for Y-axis values (required for charts, not needed for table)",
+                },
+                seriesColumn: {
+                  type: "string",
+                  description:
+                    "Optional: Column to group data into separate series (e.g., 'category', 'product_name')",
+                },
+                groupByColumn: {
+                  type: "string",
+                  description:
+                    "Optional: Column to group by (alternative to seriesColumn)",
+                },
+              },
+              description:
+                "Mapping of query result columns to chart axes. Not required for table type.",
+            },
+            title: {
+              type: "string",
+              description: "Optional title for the visualization",
+            },
+            description: {
+              type: "string",
+              description: "Optional description for the visualization",
+            },
+            useColumnAsXLabel: {
+              type: "boolean",
+              description:
+                "If true, use the xColumn values as labels instead of numeric values (useful for dates/categories)",
+            },
+          },
+          required: ["databasePath", "query", "visualizationType"],
+        },
+      },
     ],
   };
 });
@@ -226,6 +316,151 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: "text",
               text: `Failed to open browser: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+        };
+      }
+    }
+
+    case "getDatabaseSchema": {
+      try {
+        const { databasePath } = args as { databasePath: string };
+        const schema = getDatabaseSchema(databasePath);
+
+        // Format schema as readable text
+        let schemaText = `Database schema for: ${databasePath}\n\n`;
+
+        for (const table of schema.tables) {
+          schemaText += `Table: ${table.name}\n`;
+          schemaText += `Columns:\n`;
+
+          for (const col of table.columns) {
+            const constraints = [];
+            if (col.primaryKey) constraints.push("PRIMARY KEY");
+            if (col.notNull) constraints.push("NOT NULL");
+            if (col.defaultValue)
+              constraints.push(`DEFAULT ${col.defaultValue}`);
+
+            const constraintStr =
+              constraints.length > 0 ? ` (${constraints.join(", ")})` : "";
+            schemaText += `  - ${col.name}: ${col.type}${constraintStr}\n`;
+          }
+          schemaText += `\n`;
+        }
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: schemaText,
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error getting database schema: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+        };
+      }
+    }
+
+    case "queryAndVisualize": {
+      try {
+        const {
+          databasePath,
+          query,
+          visualizationType,
+          columnMapping,
+          title,
+          description,
+          useColumnAsXLabel,
+        } = args as {
+          databasePath: string;
+          query: string;
+          visualizationType: "line" | "bar" | "scatter" | "table" | "pie";
+          columnMapping?: ColumnMapping;
+          title?: string;
+          description?: string;
+          useColumnAsXLabel?: boolean;
+        };
+
+        // Execute query
+        const result = executeQuery(databasePath, query);
+
+        if (result.rows.length === 0) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: "Query returned 0 rows. No visualization created.",
+              },
+            ],
+          };
+        }
+
+        // Create visualization based on type
+        let viz;
+
+        if (visualizationType === "table") {
+          // For tables, just transform all columns
+          const tableData = transformToTable(result.rows, result.columns);
+
+          viz = stateManager.addVisualization({
+            type: "table",
+            table: tableData,
+            title,
+            description,
+          });
+        } else {
+          // For charts, need column mapping
+          if (
+            !columnMapping ||
+            !columnMapping.xColumn ||
+            !columnMapping.yColumns
+          ) {
+            throw new Error(
+              "columnMapping with xColumn and yColumns is required for chart visualizations",
+            );
+          }
+
+          const series = transformToSeries(
+            result.rows,
+            result.columns,
+            columnMapping,
+          );
+
+          const xLabels = useColumnAsXLabel
+            ? extractXLabels(result.rows, columnMapping.xColumn)
+            : undefined;
+
+          viz = stateManager.addVisualization({
+            type: visualizationType,
+            series,
+            title,
+            description,
+            xLabels,
+          });
+        }
+
+        const port = getServerPort() || 3000;
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Created ${visualizationType} visualization with ${result.rows.length} rows. ID: ${viz.id}. View at http://localhost:${port}`,
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error executing query and creating visualization: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
         };

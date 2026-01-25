@@ -16,7 +16,9 @@ Watch the [full demo on YouTube](https://www.youtube.com/watch?v=XVucQstPisc) to
 🎨 **Interactive Dashboard**: Drag-and-drop grid layout with real-time updates  
 🔄 **Live Synchronization**: Changes appear instantly in your browser  
 📊 **Rich Visualizations**: Powered by ECharts and Mermaid  
-🚀 **Easy Setup**: One command to get started  
+�️ **SQL Database Integration**: Query SQLite databases directly and visualize results  
+⚡ **Smart Data Flow**: Execute queries server-side without passing data through LLM  
+�🚀 **Easy Setup**: One command to get started  
 🌐 **Production Ready**: Built-in production mode with optimized builds
 
 ## Quick Start
@@ -68,6 +70,12 @@ Add to your MCP client configuration (e.g., Claude Desktop):
 "Draw a flowchart for the user authentication process"
 
 "Make a table with team member information"
+
+"Show me the database schema for my SQLite database"
+
+"Query the athletes table and show the top 10 with most personal records"
+
+"Create a chart showing sales trends from the database grouped by region"
 ```
 
 ## MCP Tools
@@ -77,6 +85,7 @@ Add to your MCP client configuration (e.g., Claude Desktop):
 Create charts, diagrams, and tables on the canvas.
 
 **Supported Types**:
+
 - `line` - Line charts with multiple series
 - `bar` - Bar charts for comparisons
 - `scatter` - Scatter plots for data distribution
@@ -85,6 +94,7 @@ Create charts, diagrams, and tables on the canvas.
 - `flowchart` - Mermaid diagrams (flowcharts, sequence diagrams, Gantt charts, etc.)
 
 **Example**:
+
 ```typescript
 {
   type: "line",
@@ -109,6 +119,60 @@ Remove all visualizations from the canvas.
 
 Open the dashboard in your default browser.
 
+### getDatabaseSchema
+
+Inspect the structure of a SQLite database to understand available tables and columns before writing queries.
+
+**Parameters**:
+
+- `databasePath` - Path to SQLite database file (e.g., `./data/mydb.sqlite` or absolute path)
+
+**Example**:
+
+```typescript
+{
+  databasePath: "/path/to/database.db";
+}
+```
+
+**Returns**: Formatted schema showing all tables, columns, data types, and constraints.
+
+### queryAndVisualize
+
+Execute a SQL query on a SQLite database and create a visualization from the results. Queries are executed server-side and must be read-only (SELECT only). Maximum 10,000 rows.
+
+**Parameters**:
+
+- `databasePath` - Path to SQLite database file
+- `query` - SQL SELECT query (read-only)
+- `visualizationType` - Type of chart: `line`, `bar`, `scatter`, `pie`, or `table`
+- `columnMapping` (optional for table) - Mapping of columns to chart axes:
+  - `xColumn` - Column for X-axis (required for charts)
+  - `yColumns` - Array of columns for Y-axis (required for charts)
+  - `seriesColumn` - Column to group data into separate series (optional)
+  - `groupByColumn` - Alternative grouping column (optional)
+- `title` - Optional title for visualization
+- `description` - Optional description
+- `useColumnAsXLabel` - If true, use X column values as labels instead of numbers
+
+**Example**:
+
+```typescript
+{
+  databasePath: "./data/sales.db",
+  query: "SELECT region, SUM(revenue) as total FROM sales GROUP BY region",
+  visualizationType: "bar",
+  columnMapping: {
+    xColumn: "region",
+    yColumns: ["total"]
+  },
+  title: "Revenue by Region",
+  useColumnAsXLabel: true
+}
+```
+
+**Security**: Only SELECT and WITH (CTE) queries are allowed. INSERT, UPDATE, DELETE, DROP, and other modifying operations are blocked.
+
 ## Architecture
 
 - **Backend**: Node.js + TypeScript + Express + MCP SDK
@@ -128,7 +192,7 @@ cd chart-canvas
 cd backend
 npm install
 
-# Install frontend dependencies  
+# Install frontend dependencies
 cd ../frontend
 npm install
 

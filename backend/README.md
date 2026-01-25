@@ -77,6 +77,7 @@ Add to your MCP client configuration (e.g., Claude Desktop):
 Create charts, diagrams, and tables on the canvas.
 
 **Supported Types**:
+
 - `line` - Line charts with multiple series
 - `bar` - Bar charts for comparisons
 - `scatter` - Scatter plots for data distribution
@@ -85,6 +86,7 @@ Create charts, diagrams, and tables on the canvas.
 - `flowchart` - Mermaid diagrams (flowcharts, sequence diagrams, Gantt charts, etc.)
 
 **Example**:
+
 ```typescript
 {
   type: "line",
@@ -109,6 +111,60 @@ Remove all visualizations from the canvas.
 
 Open the dashboard in your default browser.
 
+### getDatabaseSchema
+
+Inspect the structure of a SQLite database to understand available tables and columns before writing queries.
+
+**Parameters**:
+
+- `databasePath` - Path to SQLite database file (e.g., `./data/mydb.sqlite` or absolute path)
+
+**Example**:
+
+```typescript
+{
+  databasePath: "/path/to/database.db";
+}
+```
+
+**Returns**: Formatted schema showing all tables, columns, data types, and constraints.
+
+### queryAndVisualize
+
+Execute a SQL query on a SQLite database and create a visualization from the results. Queries are executed server-side and must be read-only (SELECT only). Maximum 10,000 rows.
+
+**Parameters**:
+
+- `databasePath` - Path to SQLite database file
+- `query` - SQL SELECT query (read-only)
+- `visualizationType` - Type of chart: `line`, `bar`, `scatter`, `pie`, or `table`
+- `columnMapping` (optional for table) - Mapping of columns to chart axes:
+  - `xColumn` - Column for X-axis (required for charts)
+  - `yColumns` - Array of columns for Y-axis (required for charts)
+  - `seriesColumn` - Column to group data into separate series (optional)
+  - `groupByColumn` - Alternative grouping column (optional)
+- `title` - Optional title for visualization
+- `description` - Optional description
+- `useColumnAsXLabel` - If true, use X column values as labels instead of numbers
+
+**Example**:
+
+```typescript
+{
+  databasePath: "./data/sales.db",
+  query: "SELECT region, SUM(revenue) as total FROM sales GROUP BY region",
+  visualizationType: "bar",
+  columnMapping: {
+    xColumn: "region",
+    yColumns: ["total"]
+  },
+  title: "Revenue by Region",
+  useColumnAsXLabel: true
+}
+```
+
+**Security**: Only SELECT and WITH (CTE) queries are allowed. INSERT, UPDATE, DELETE, DROP, and other modifying operations are blocked.
+
 ## Architecture
 
 - **Backend**: Node.js + TypeScript + Express + MCP SDK
@@ -128,7 +184,7 @@ cd chart-canvas
 cd backend
 npm install
 
-# Install frontend dependencies  
+# Install frontend dependencies
 cd ../frontend
 npm install
 

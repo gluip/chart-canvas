@@ -1,7 +1,7 @@
 {
   "name": "@gluip/chart-canvas-mcp",
   "version": "0.1.5",
-  "description": "MCP server for creating interactive visualizations (charts, diagrams, tables) through AI assistants",
+  "description": "MCP server for creating interactive visualizations (charts, diagrams, tables) and querying SQLite databases through AI assistants",
   "author": "Martijn",
   "license": "MIT",
   "type": "module",
@@ -22,7 +22,11 @@
     "echarts",
     "mermaid",
     "ai",
-    "llm"
+    "llm",
+    "sqlite",
+    "database",
+    "sql",
+    "query"
   ],
   "repository": {
     "type": "git",
@@ -41,12 +45,14 @@
     "@modelcontextprotocol/sdk": "^1.0.4",
     "express": "^4.21.2",
     "cors": "^2.8.5",
-    "open": "^10.1.0"
+    "open": "^10.1.0",
+    "better-sqlite3": "^11.8.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/cors": "^2.8.17",
     "@types/node": "^22.10.5",
+    "@types/better-sqlite3": "^7.6.12",
     "typescript": "^5.7.3",
     "tsx": "^4.19.2"
   }
