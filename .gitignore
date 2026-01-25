@@ -20,3 +20,7 @@ dist/
 # Logs
 *.log
 npm-debug.log*
+data/atletiek.db
+data/atletiek.db-shm
+data/atletiek.db-wal
+data/Chinook_Sqlite.sqlite
