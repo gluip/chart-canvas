@@ -58,8 +58,5 @@ export async function startApiServer() {
 
   app.listen(PORT, () => {
     serverPort = PORT;
-    console.log(`Server running on http://localhost:${PORT}`);
-    console.log(`- API: http://localhost:${PORT}/state`);
-    console.log(`- Frontend: http://localhost:${PORT}`);
   });
 }

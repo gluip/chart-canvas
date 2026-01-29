@@ -1,6 +1,6 @@
 {
   "name": "@gluip/chart-canvas-mcp",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "mcpName": "io.github.gluip/chart-canvas",
   "description": "MCP server for creating interactive visualizations (charts, diagrams, tables) and querying data sources (SQLite, CSV, Parquet, JSON) through AI assistants",
   "author": "Martijn",
@@ -31,7 +31,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/gluip/chart-canvas.git"
+    "url": "git+https://github.com/gluip/chart-canvas.git"
   },
   "scripts": {
     "build": "tsc",
