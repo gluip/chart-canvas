@@ -8,8 +8,14 @@
     //   ]
     // },
 
+    "chart-canvas-local": {
+      "command": "/opt/homebrew/bin/node",
+      "args": ["/Users/martijn/Code/chart-canvas/backend/dist/index.js"]
+    },
+
     "chart-canvas": {
-      "command": "chart-canvas-mcp"
+      "command": "/opt/homebrew/bin/npx",
+      "args": ["-y", "@gluip/chart-canvas-mcp"]
     }
   }
 }

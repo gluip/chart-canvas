@@ -48,7 +48,7 @@ export async function startApiServer() {
   });
 
   // Serve frontend static files in production
-  const frontendDistPath = path.join(__dirname, "../../frontend/dist");
+  const frontendDistPath = path.join(__dirname, "frontend");
   app.use(express.static(frontendDistPath));
 
   // Fallback to index.html for client-side routing
